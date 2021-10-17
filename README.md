@@ -1,0 +1,2 @@
+# varsion
+varsion is a go program that attempts to handle source code versioning universally by placing a VERSION file at the root of the source code. it uses this VERSION file along with a .atoolconfig.json configuration file to handle Semantic Versioning for the developers. the user just provides what segment of the version to change and it will handle everything else. varsion allows for prefixes and suffixes to be added to the version but other applications that might use the VERSION file might fail due to this.
