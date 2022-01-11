@@ -20,7 +20,7 @@ func main() {
 	isConfigLoaded := getConfiguration(pathToConfig)
 
 	if !isConfigLoaded {
-		fmt.Println("configuration not loaded")
+		fmt.Println("[INFO]: configuration not loaded")
 		os.Exit(1)
 	}
 
@@ -29,14 +29,14 @@ func main() {
 	isVarsionLoaded := getVarsionFile(pathToVarsion, varsionConfig)
 
 	if !isVarsionLoaded {
-		fmt.Println("version not loaded")
+		fmt.Println("[WARN]: version not loaded")
 		os.Exit(1)
 	}
 
 	isCommandsLoaded := getCommandsFromArgs()
 
 	if !isCommandsLoaded {
-		fmt.Println("commands not given")
+		fmt.Println("[WARN]: commands not given")
 		os.Exit(1)
 	}
 
@@ -49,7 +49,7 @@ func main() {
 func getCurrentWorkingPath() string {
 	workingPath, err := os.Getwd()
 	if err != nil {
-		fmt.Println("failed getting working directory")
+		fmt.Println("[ERROR]: failed getting working directory")
 		log.Fatal(err)
 	}
 	return workingPath
@@ -58,8 +58,7 @@ func getCurrentWorkingPath() string {
 func getConfiguration(pathToConfig string) bool {
 	err := configuration.Initialize(pathToConfig)
 	if err != nil {
-		fmt.Println("configuration failed to load, attempting to create")
-		fmt.Println(err)
+		fmt.Println("[WARN]: configuration failed to load, attempting to create")
 		return createConfiguration(pathToConfig)
 	}
 	return true
@@ -77,19 +76,19 @@ func createConfiguration(pathToConfig string) bool {
 
 	configurationJson, err := json.MarshalIndent(newConfiguration, "", "\t")
 	if err != nil {
-		fmt.Println("configuration failed to create")
+		fmt.Println("[ERROR]: configuration failed to create")
 		log.Fatal(err)
 	}
 
 	err = fileio.WriteFile(pathToConfig, configurationJson)
 	if err != nil {
-		fmt.Println("configuration failed to create")
+		fmt.Println("[ERROR]: configuration failed to create")
 		log.Fatal(err)
 	}
 
 	err = configuration.Initialize(pathToConfig)
 	if err != nil {
-		fmt.Println("configuration failed to create")
+		fmt.Println("[ERROR]: configuration failed to create")
 		log.Fatal(err)
 	}
 
@@ -99,7 +98,7 @@ func createConfiguration(pathToConfig string) bool {
 func getVarsionFile(pathToFile string, config configuration.VarsionConfig) bool {
 	err := varsionhandler.ReadVarsionFile(pathToFile, config)
 	if err != nil {
-		fmt.Println("version failed to load, attempting to create")
+		fmt.Println("[INFO]: version failed to load, attempting to create")
 		fmt.Println(err)
 		return createVarsionFile(pathToFile, config)
 	}
@@ -109,7 +108,7 @@ func getVarsionFile(pathToFile string, config configuration.VarsionConfig) bool 
 func createVarsionFile(pathToFile string, config configuration.VarsionConfig) bool {
 	err := varsionhandler.CreateVarsionFile(pathToFile, config)
 	if err != nil {
-		fmt.Println("version failed to create")
+		fmt.Println("[ERROR]: version failed to create")
 		log.Fatal(err)
 	}
 	return true
@@ -127,8 +126,8 @@ func getCommandsFromUser() bool {
 	var input string
 
 	currentVarsion := varsionhandler.GetVarsionString()
-	fmt.Printf("current version: [%s]\n", currentVarsion)
-	fmt.Print("segment to change (major, minor, patch): ")
+	fmt.Printf("[INFO]: current version: [%s]\n", currentVarsion)
+	fmt.Print("[INPUT]: segment to change (major, minor, patch): ")
 	fmt.Scanln(&input)
 	givenCommands = append(givenCommands, input)
 
@@ -159,14 +158,14 @@ func handleCommands(pathToFile string) {
 	case "P":
 		err = varsionhandler.IncrementPatch()
 	default:
-		log.Fatal("unknown command")
+		log.Fatal("[ERROR]: unknown command")
 	}
 
 	if err != nil {
-		fmt.Println("version failed to update")
+		fmt.Println("[ERROR]: version failed to update")
 		log.Fatal(err)
 	}
 
 	varsionTo := varsionhandler.GetVarsionString()
-	fmt.Printf("[%s] -> [%s]", varsionFrom, varsionTo)
+	fmt.Printf("[INFO]: [%s] -> [%s]", varsionFrom, varsionTo)
 }
