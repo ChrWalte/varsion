@@ -13,24 +13,34 @@ import (
 )
 
 var givenCommands []string = make([]string, 0)
+var defaultConfig = configuration.Config{
+	Varsion: configuration.VarsionConfig{
+		FileName:  "VERSION",
+		Prefix:    "",
+		Suffix:    "",
+		Delimiter: ".",
+	},
+}
 
 func main() {
 	workingPath := getCurrentWorkingPath()
 	pathToConfig := path.Join(workingPath, ".atoolconfig.json")
 	isConfigLoaded := getConfiguration(pathToConfig)
 
-	if !isConfigLoaded {
-		fmt.Println("[INFO]: configuration not loaded")
-		os.Exit(1)
+	varsionConfig := defaultConfig.Varsion
+	if isConfigLoaded {
+		varsionConfig = configuration.Data.Varsion
+		fmt.Println("[INFO]: configuration loaded")
 	}
 
-	varsionConfig := configuration.Data.Varsion
 	pathToVarsion := path.Join(workingPath, varsionConfig.FileName)
 	isVarsionLoaded := getVarsionFile(pathToVarsion, varsionConfig)
 
 	if !isVarsionLoaded {
 		fmt.Println("[WARN]: version not loaded")
 		os.Exit(1)
+	} else {
+		fmt.Println("[INFO]: version loaded")
 	}
 
 	isCommandsLoaded := getCommandsFromArgs()
@@ -58,22 +68,14 @@ func getCurrentWorkingPath() string {
 func getConfiguration(pathToConfig string) bool {
 	err := configuration.Initialize(pathToConfig)
 	if err != nil {
-		fmt.Println("[WARN]: configuration failed to load, attempting to create")
-		return createConfiguration(pathToConfig)
+		fmt.Println("[WARN]: configuration failed to load")
 	}
 	return true
 }
 
+// deprecated: left in for command addition
 func createConfiguration(pathToConfig string) bool {
-	newConfiguration := configuration.Config{
-		Varsion: configuration.VarsionConfig{
-			FileName:  "VERSION",
-			Prefix:    "",
-			Suffix:    "",
-			Delimiter: ".",
-		},
-	}
-
+	newConfiguration := defaultConfig
 	configurationJson, err := json.MarshalIndent(newConfiguration, "", "\t")
 	if err != nil {
 		fmt.Println("[ERROR]: configuration failed to create")
@@ -98,7 +100,7 @@ func createConfiguration(pathToConfig string) bool {
 func getVarsionFile(pathToFile string, config configuration.VarsionConfig) bool {
 	err := varsionhandler.ReadVarsionFile(pathToFile, config)
 	if err != nil {
-		fmt.Println("[INFO]: version failed to load, attempting to create")
+		fmt.Println("[ERROR]: version failed to load, attempting to create")
 		fmt.Println(err)
 		return createVarsionFile(pathToFile, config)
 	}
@@ -117,6 +119,7 @@ func createVarsionFile(pathToFile string, config configuration.VarsionConfig) bo
 func getCommandsFromArgs() bool {
 	if len(os.Args) >= 2 {
 		givenCommands = os.Args[1:]
+		fmt.Println("[INFO]: command args given")
 		return true
 	}
 	return getCommandsFromUser()
