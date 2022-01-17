@@ -1,5 +1,9 @@
 # varsion changelog
 
+## VERSION 1.0.2
+
+- fixed bug where application would fail when checking for configuration file
+
 ## VERSION 1.0.1
 
 - updating logging with message types

@@ -69,6 +69,7 @@ func getConfiguration(pathToConfig string) bool {
 	err := configuration.Initialize(pathToConfig)
 	if err != nil {
 		fmt.Println("[WARN]: configuration failed to load")
+		return false
 	}
 	return true
 }
